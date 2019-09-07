@@ -24,6 +24,7 @@ def get_spectrogram(data, plot = False):
     else:
         pxx, _, _, _ = plt.specgram(data, nfft, fs, noverlap = noverlap)
     return pxx
+from keras.utils import np_utils
 
 def LoadData(source_dir = "DataLabels"):
     print("Loading....\n")
@@ -34,6 +35,13 @@ def LoadData(source_dir = "DataLabels"):
             sound, _ = librosa.load("FusedSounds/"+ fn[:-11] + ".wav")
         except:
             sound, _ = librosa.load("RawSounds/"+ fn[:-11] + ".wav")
-        X.append(get_spectrogram(sound))
-    return X, Y 
+        _X = get_spectrogram(sound)
+        _X = _X.swapaxes(0,1)#_X = np.expand_dims(_X, axis=0)
+        X.append(_X)
+        print(Y[0].shape)
+        # break
+        return np.array(X), np.array(Y) 
+if __name__ == "__main__":
+    X, Y = LoadData()
+
 
