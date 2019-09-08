@@ -46,7 +46,7 @@ def BuildModel(input_shape):
     model = Model(inputs = X_input, outputs = X)    
     return model  
 
-SPQ = 5511 # The number of samples feed into the spectogram -> model 
+SPQ = 1927 #5511 # The number of samples feed from the spectogram -> model 
 n_freq = 101 # Number of frequencies input to the model at each time step of the spectrogram
 
 model = BuildModel(input_shape = (SPQ, n_freq))
@@ -55,3 +55,5 @@ model.compile(loss='binary_crossentropy', optimizer=opt, metrics=["accuracy"])
 model.summary()
 
 X, Y = LoadData()
+
+model.fit(X, Y, batch_size = 1, epochs=1)
