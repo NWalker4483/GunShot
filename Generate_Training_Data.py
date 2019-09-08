@@ -3,6 +3,7 @@ import librosa
 import matplotlib.pyplot as plt 
 import numpy as np 
 from scipy.ndimage.morphology import binary_dilation
+from tqdm import tqdm
 source_dir = "RawSounds"
 try:
     os.mkdir("FusedSounds")
@@ -48,9 +49,9 @@ def divide_chunks(l, n):
         data.append(l[i:i + n])
     return data 
 def ExtractGunClips(source_dir = "RawSounds"):
-    for i in os.listdir(source_dir):
+    print("Extracting Clips...")
+    for i in tqdm(os.listdir(source_dir)):
         if "gun_shot" in i:
-            print(i)
             raw_sound, sample_rate  = librosa.load(source_dir+"/"+i)
             raw_sound = np.array(raw_sound)
 
@@ -79,9 +80,9 @@ def FuseGunShots(gun_source = "GunClips"):# in BackGround Noise && Generate Labe
     source_files = os.listdir(gun_source)
     sample_rate = 22050 
     clip_length = 7 #Seconds 
-    for i in os.listdir(source_dir):
+    print("Fusing Shots...")
+    for i in tqdm(os.listdir(source_dir)):
         if "gun_shot" not in i:
-            print(i)
             source,_ = librosa.load(source_dir+"/"+i)
             clips = divide_chunks(source,(sample_rate * clip_length))
             if len(clips[-1]) < (sample_rate * clip_length)/2: 
