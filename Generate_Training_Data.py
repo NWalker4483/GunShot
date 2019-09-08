@@ -4,16 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np 
 from scipy.ndimage.morphology import binary_dilation
 from tqdm import tqdm
+from SoundHelpers import *
 
-def resize_mask(mask,size = 100):
-    new_mask = np.zeros(size)
-    for start, end in extract_chunks(mask):
-        new_start, new_end = (start / len(mask)) * size, (end / len(mask)) * size
-        new_mask[int(new_start):int(new_end)] = 1
-    return new_mask
-def overlay(background,active, position = 0):
-    background[position:position+len(active)] += active
-    return background
 # Extracting gunshot clips to do hotword training 
 def extract_chunks(data):
     clips = [] 

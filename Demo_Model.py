@@ -1,8 +1,23 @@
 import pyaudio
 from queue import Queue
+
+from keras.models import load_model
 from threading import Thread
 import sys
+import numpy as np 
 import time
+from SoundHelpers import get_spectrogram 
+def get_audio_input_stream(callback):
+    stream = pyaudio.PyAudio().open(
+        format=pyaudio.paInt16,
+        channels=1,
+        rate=fs,
+        input=True,
+        frames_per_buffer=chunk_samples,
+        input_device_index=0,
+        stream_callback=callback)
+    return stream
+
 def detect_triggerword_spectrum(x):
     """
     Function to predict the location of the trigger word.
@@ -46,7 +61,7 @@ def has_new_triggerword(predictions, chunk_duration, feed_duration, threshold=0.
             level = pred
     return False
     
-# model = load_model('./models/tr_model.h5')
+model = load_model('checkpoints/model-0015.h5')
 chunk_duration = 0.5 # Each read length in seconds from mic.
 fs = 22050 # sampling rate for mic
 chunk_samples = int(fs * chunk_duration) # Each read length in number of samples.
@@ -56,17 +71,6 @@ feed_duration = 7
 feed_samples = int(fs * feed_duration)
 
 assert feed_duration/chunk_duration == int(feed_duration/chunk_duration)
-
-def get_audio_input_stream(callback):
-    stream = pyaudio.PyAudio().open(
-        format=pyaudio.paInt16,
-        channels=1,
-        rate=fs,
-        input=True,
-        frames_per_buffer=chunk_samples,
-        input_device_index=0,
-        stream_callback=callback)
-    return stream
 
 # Queue to communiate between the audio callback and main thread
 q = Queue()

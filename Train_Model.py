@@ -1,7 +1,6 @@
 from keras.callbacks import ModelCheckpoint
-from keras.models import Model, load_model, Sequential
 from keras.layers import Dense, Activation, Dropout, Input, TimeDistributed, LSTM, Conv1D
-from keras.layers import GRU, Bidirectional, BatchNormalization, Reshape
+from keras.layers import GRU, BatchNormalization, Reshape
 from keras.optimizers import Adam
 
 from LoadDataHelpers import LoadData
@@ -46,11 +45,11 @@ def BuildModel(input_shape):
     model = Model(inputs = X_input, outputs = X)    
     return model  
 
-SPQ = 1927 #5511 # The number of samples feed from the spectogram -> model 
+SPQ = 1927 # The number of samples feed from the spectogram -> model 
 n_freq = 101 # Number of frequencies input to the model at each time step of the spectrogram
 
 model = BuildModel(input_shape = (SPQ, n_freq))
-model.load_weights("checkpoints/cp-0015.ckpt")
+
 opt = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, decay=0.01)
 model.compile(loss='binary_crossentropy', optimizer=opt, metrics=["accuracy"])
 model.summary()
@@ -69,9 +68,4 @@ cp_callback = ModelCheckpoint(
                 verbose=1, 
                 save_best_only=True, 
                 mode='min')
-
-try:
-    model.fit(X, Y, callbacks=[cp_callback], batch_size = 50, epochs=5000)
-    model.save("Urban.h5")
-except:
-    model.save("Urban.inc.h5")
+model.fit(X, Y, callbacks=[cp_callback], batch_size = 50, epochs=5000)
