@@ -54,7 +54,7 @@ from tqdm import tqdm
 
 
 def LoadData(source_dir = "DataLabels",Ty = 479):
-    print("Loading....\n")
+    print("Loading in Data....\n")
     X, Y = [], []
     for fn in tqdm(os.listdir(source_dir)):
         _Y = np.load(source_dir+"/"+fn)
@@ -66,10 +66,9 @@ def LoadData(source_dir = "DataLabels",Ty = 479):
         except:
             sound, _ = librosa.load("RawSounds/"+ fn[:-11] + ".wav")
         _X = get_spectrogram(sound)
-        _X = _X.swapaxes(0,1)#_X = np.expand_dims(_X, axis=0)
+        _X = _X.swapaxes(0,1)
         X.append(_X)
-        # break
-        return np.array(X), np.array(Y) 
+    return np.array(X), np.array(Y) 
 if __name__ == "__main__":
     X, Y = LoadData()
 

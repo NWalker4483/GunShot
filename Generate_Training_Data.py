@@ -4,16 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np 
 from scipy.ndimage.morphology import binary_dilation
 from tqdm import tqdm
-source_dir = "RawSounds"
-try:
-    os.mkdir("FusedSounds")
-try:
-    os.mkdir("DataLabels")
-try:
-    os.mkdir("GunClips")
-except:
-    pass
-#
+
 def resize_mask(mask,size = 100):
     new_mask = np.zeros(size)
     for start, end in extract_chunks(mask):
@@ -59,6 +50,7 @@ def ExtractGunClips(source_dir = "RawSounds"):
             mask = np.ones_like(raw_sound)
             mask[abs(raw_sound) <= silence_threshold] = 0
             mask = binary_dilation(mask, iterations=3000)
+
             if sum(mask) == len(raw_sound):
                 continue
             shot = 0 
@@ -67,7 +59,7 @@ def ExtractGunClips(source_dir = "RawSounds"):
                 librosa.output.write_wav("GunClips/gun_shot."+base_name+".clip."+str(shot)+".wav",raw_sound[start:stop],sample_rate)
                 shot += 1
             np.save("DataLabels/gun_shot."+base_name+".labels.npy", mask)   
-            """
+            
             ##For Viz###
             shots = raw_sound.copy()
             shots[mask == 0] = 0 
@@ -75,7 +67,6 @@ def ExtractGunClips(source_dir = "RawSounds"):
             plt.plot(range(len(raw_sound)),[silence_threshold,]*len(raw_sound),"r--")
             plt.show()
             ############
-            """
 def FuseGunShots(gun_source = "GunClips"):# in BackGround Noise && Generate Label Files
     source_files = os.listdir(gun_source)
     sample_rate = 22050 
@@ -106,9 +97,6 @@ def FuseGunShots(gun_source = "GunClips"):# in BackGround Noise && Generate Labe
                     audio_samples = [librosa.load(gun_source+"/"+j)[0] for j in curr_source]
                     # If the files were stacked end to end in the background noise how much space is left remaining
                     buffer = len(background) - sum([len(sample) for sample in audio_samples])
-                if fails == 5:
-                    print("Fails")
-                    continue
                 start = 0
                 for sample in audio_samples:
                     end = np.random.randint(start,start+buffer)
@@ -116,11 +104,16 @@ def FuseGunShots(gun_source = "GunClips"):# in BackGround Noise && Generate Labe
                     labels[end:end+len(sample)] = 1
                     buffer -= (end - start)  
                     start = end 
-                Ty = 479
-                mask = resize_mask(mask,Ty)
                 librosa.output.write_wav("FusedSounds/"+".".join(i.split(".")[:2])+"."+str(num2)+".fused.wav",background,sample_rate)
                 np.save("DataLabels/"+".".join(i.split(".")[:2])+"."+str(num2)+".fused.labels.npy", labels)   
 if __name__ == "__main__":
-    #ExtractGunClips()
+    source_dir = "RawSounds"
+    try:
+        os.mkdir("FusedSounds")
+        os.mkdir("DataLabels")
+        os.mkdir("GunClips")
+    except:
+        pass
+    ExtractGunClips()
     #FuseGunShots()
     pass

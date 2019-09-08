@@ -5,7 +5,7 @@ from keras.layers import GRU, Bidirectional, BatchNormalization, Reshape
 from keras.optimizers import Adam
 
 from LoadDataHelpers import LoadData
-
+import os 
 #TODO: Convert to format below 
 """
 model = Sequential()
@@ -50,10 +50,28 @@ SPQ = 1927 #5511 # The number of samples feed from the spectogram -> model
 n_freq = 101 # Number of frequencies input to the model at each time step of the spectrogram
 
 model = BuildModel(input_shape = (SPQ, n_freq))
+model.load_weights("checkpoints/cp-0015.ckpt")
 opt = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, decay=0.01)
 model.compile(loss='binary_crossentropy', optimizer=opt, metrics=["accuracy"])
 model.summary()
 
 X, Y = LoadData()
+# x, y = X[7000:], Y[7000:]
+# X, Y = X[:7000], Y[:7000]
 
-model.fit(X, Y, batch_size = 1, epochs=1)
+# Include the epoch in the file name (uses `str.format`)
+filepath = "checkpoints/model-{epoch:04d}.h5"
+
+# Create a callback that saves the model every 5 epochs
+cp_callback = ModelCheckpoint(
+                filepath=filepath,
+                monitor='loss', 
+                verbose=1, 
+                save_best_only=True, 
+                mode='min')
+
+try:
+    model.fit(X, Y, callbacks=[cp_callback], batch_size = 50, epochs=5000)
+    model.save("Urban.h5")
+except:
+    model.save("Urban.inc.h5")
